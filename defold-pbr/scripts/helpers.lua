@@ -89,6 +89,7 @@ M.make_params = function(from_params)
 
 	p.irradiance = from_params.irradiance or p.irradiance
 	p.prefilter  = from_params.prefilter or p.prefilter
+	p.brdf_lut = from_params.brdf_lut or p.brdf_lut
 	return p
 end
 
