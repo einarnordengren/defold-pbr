@@ -59,7 +59,7 @@ M.initialize = function(brdf_lut_buffer, params)
 	ctx.params             = helpers.make_params(params)
 	ctx.texture_irradiance = helpers.make_irradiance_texture(ctx.params.irradiance.width, ctx.params.irradiance.height)
 	ctx.texture_prefilter  = helpers.make_prefilter_texture(ctx.params.prefilter.width, ctx.params.prefilter.height, ctx.params.prefilter.mipmaps) 
-	ctx.texture_brdf_lut   = helpers.make_brdf_lut(brdf_lut_buffer, 512, 512)
+	ctx.texture_brdf_lut   = helpers.make_brdf_lut(brdf_lut_buffer, ctx.params.brdf_lut.width, ctx.params.brdf_lut.height)
 	
 	ctx.handle_irradiance  = resource.get_texture_info(ctx.texture_irradiance).handle
 	ctx.handle_prefilter   = resource.get_texture_info(ctx.texture_prefilter).handle

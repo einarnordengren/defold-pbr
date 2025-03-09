@@ -76,7 +76,11 @@ M.make_params = function(from_params)
 			width   = 256,
 			height  = 256,
 			mipmaps = 9
-		}
+		},
+		brdf_lut = {
+			width = 512,
+			height = 512
+		},
 	}
 
 	if from_params == nil then
