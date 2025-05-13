@@ -22,6 +22,8 @@
 	uniform lowp sampler2D tex_emissive;
 
 	uniform mediump vec4 u_camera_position;
+	uniform mediump mat4 u_cubemap_world_to_local;
+	uniform mediump vec4 u_cubemap_position;
 
 	// col 0: xyz: position
 	// col 1: xyz: direction
@@ -67,5 +69,12 @@
 		vec3 vertexPositionWorld;
 		vec3 vertexDirectionToCamera;
 		vec3 vertexNormal;
+	};
+
+	struct CubemapData
+	{
+		bool useParallaxCorrection;
+		mat4 cubemapWorldToLocal;
+		vec3 cubemapPosition;
 	};
 #endif

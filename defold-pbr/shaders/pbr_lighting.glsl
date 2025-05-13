@@ -136,7 +136,22 @@
 		return (FmsEms + k_D) * irradiance;
 	}
 
-	vec3 getIBLRadianceGGX(vec3 n, vec3 v, float roughness, vec3 F0, float specularWeight)
+	// https://cientistavuador.github.io/articles/5_en-us.html
+	float intersectRayInsideBox(vec3 rayOrigin, vec3 rayDirection, mat4 worldToLocal)
+	{
+		vec3 localOrigin = (worldToLocal * vec4(rayOrigin, 1.0)).xyz;
+		vec3 aabbCheck = abs(localOrigin);
+		if (max(aabbCheck.x, max(aabbCheck.y, aabbCheck.z)) > 1.0) {
+			return -1.0;
+		}
+		vec3 localDirection = mat3(worldToLocal) * rayDirection;
+		vec3 firstPlane = (vec3(-1.0) - localOrigin) / localDirection;
+		vec3 secondPlane = (vec3(1.0) - localOrigin) / localDirection;
+		vec3 furthestPlane = max(firstPlane, secondPlane);
+		return min(furthestPlane.x, min(furthestPlane.y, furthestPlane.z));
+	}
+
+	vec3 getIBLRadianceGGX(vec3 pos, vec3 n, vec3 v,  bool useParallaxCorrection, mat4 cubemapWorldToLocal, vec3 cubemapPosition, float roughness, vec3 F0, float specularWeight)
 	{
 		// TODO
 		const float u_MipCount = 9.0;
@@ -144,6 +159,17 @@
 		float NdotV = clampedDot(n, v);
 		float lod = roughness * float(u_MipCount - 1.0);
 		vec3 reflection = normalize(reflect(-v, n));
+
+		if (useParallaxCorrection)
+		{
+			float t = intersectRayInsideBox(pos, reflection, cubemapWorldToLocal);
+			if (t >= 0)
+			{
+				vec3 P = pos + (reflection * t);
+				reflection = normalize(P - cubemapPosition);
+				reflection = (cubemapWorldToLocal * vec4(reflection, 0.0)).xyz;
+			}
+		}
 
 		vec2 brdfSamplePoint = clamp(vec2(NdotV, roughness), vec2(0.0, 0.0), vec2(1.0, 1.0));
 		vec2 f_ab = texture(tex_brdflut, brdfSamplePoint).rg;
@@ -161,14 +187,14 @@
 		return specularWeight * specularLight * FssEss;
 	}
 
-	LightingInfo getLighting(PBRData data, PBRParams params, MaterialInfo mat)
+	LightingInfo getLighting(PBRData data, CubemapData cubemapData, PBRParams params, MaterialInfo mat)
 	{
 		vec3 light_diffuse  = vec3(0.0);
 		vec3 light_specular = vec3(0.0);
 
 		#ifdef LIGHT_IBL
 		light_diffuse  += getIBLRadianceLambertian(data.vertexNormal, data.vertexDirectionToCamera, mat.perceptualRoughness, mat.diffuseColor, mat.f0, mat.specularWeight);
-		light_specular += getIBLRadianceGGX(data.vertexNormal, data.vertexDirectionToCamera, mat.perceptualRoughness, mat.f0, mat.specularWeight);
+		light_specular += getIBLRadianceGGX(data.vertexPositionWorld, data.vertexNormal, data.vertexDirectionToCamera, cubemapData.useParallaxCorrection, cubemapData.cubemapWorldToLocal, cubemapData.cubemapPosition, mat.perceptualRoughness, mat.f0, mat.specularWeight);
 		#endif
 
 		#ifdef LIGHT_PUNCTUAL
