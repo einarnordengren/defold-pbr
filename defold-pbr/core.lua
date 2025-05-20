@@ -65,11 +65,13 @@ M.initialize = function(brdf_lut_buffer, params)
 	ctx.handle_prefilter   = resource.get_texture_info(ctx.texture_prefilter).handle
 	ctx.handle_brdf_lut    = resource.get_texture_info(ctx.texture_brdf_lut).handle
 	ctx.render_args        = {
-		camera_world   = vmath.vector3(),
-		debug_mode     = M.DEBUG_MODE.NONE,
-		debug_mode_key = "NONE",
-		exposure       = 1,
-		lights         = {},
+		camera_world           = vmath.vector3(),
+		cubemap_world_to_local = vmath.matrix4(),
+		cubemap_position       = vmath.vector4(),
+		debug_mode             = M.DEBUG_MODE.NONE,
+		debug_mode_key         = "NONE",
+		exposure               = 1,
+		lights                 = {},
 	}
 
 	M.__ctx = ctx
@@ -155,6 +157,16 @@ M.set_camera_world = function(camera_p)
 	ctx.render_args.camera_world = camera_p
 end
 
+M.set_cubemap_world_to_local = function(cubemap_world_to_local)
+	local ctx = get_ctx()
+	ctx.render_args.cubemap_world_to_local = cubemap_world_to_local
+end
+
+M.set_cubemap_position = function(cubemap_position)
+	local ctx = get_ctx()
+	ctx.render_args.cubemap_position = cubemap_position
+end
+
 ------------
 -- Rendering
 ------------
@@ -190,6 +202,8 @@ M.get_constants = function()
 	ctx.render_args.constants.u_pbr_scene_params = vmath.vector4(ctx.render_args.debug_mode, #ctx.render_args.lights, ctx.render_args.exposure, 0)
 	ctx.render_args.constants.u_camera_position  = vmath.vector4(ctx.render_args.camera_world.x,ctx.render_args.camera_world.y,ctx.render_args.camera_world.z,0)
 
+	ctx.render_args.constants.u_cubemap_world_to_local = ctx.render_args.cubemap_world_to_local
+	ctx.render_args.constants.u_cubemap_position = ctx.render_args.cubemap_position
 	return ctx.render_args.constants
 end
 

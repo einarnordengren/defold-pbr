@@ -111,4 +111,13 @@
 		return data;
 	}
 
+	CubemapData getCubemapData()
+	{
+		CubemapData data;
+		data.cubemapWorldToLocal = u_cubemap_world_to_local;
+		data.cubemapPosition = u_cubemap_position.xyz;
+		data.useParallaxCorrection = u_cubemap_position.w > 0.0f;
+		return data;
+	}
+
 #endif // PBR_DATA

@@ -11,7 +11,8 @@ void main()
 	PBRParams params          = getPBRParams();
 	MaterialInfo materialInfo = getMaterialInfo(params);
 	PBRData pbrData           = getPBRData(params, materialInfo);
-	LightingInfo lightInfo    = getLighting(pbrData, params, materialInfo);
+	CubemapData cubemapData   = getCubemapData();
+	LightingInfo lightInfo    = getLighting(pbrData, cubemapData, params, materialInfo);
 
 	vec3 lighting             = lightInfo.diffuse + lightInfo.specular;
 	lighting                  = applyOcclusion(params, lightInfo, lighting);
