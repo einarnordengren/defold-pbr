@@ -1,17 +1,14 @@
 mesh: "/assets/scenes/MetalRoughSpheres_Build/meshes/Spheres.003.glb"
-skeleton: ""
-animations: ""
-default_animation: ""
 name: "Model_4"
 materials {
   name: "default"
   material: "/assets/scenes/MetalRoughSpheres_Build/materials/Material_0.material"
   textures {
-    sampler: "tex_diffuse_irradiance"
+    sampler: "tex_diffuse_irradiance_skybox"
     texture: "/defold-pbr/textures/blank_cube.cubemap"
   }
   textures {
-    sampler: "tex_prefiltered_reflection"
+    sampler: "tex_prefiltered_reflection_skybox"
     texture: "/defold-pbr/textures/blank_cube.cubemap"
   }
   textures {

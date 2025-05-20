@@ -10,8 +10,10 @@
 	varying mediump mat3 var_TBN;
 
 	// Environment inputs
-	uniform mediump samplerCube tex_diffuse_irradiance;
-	uniform mediump samplerCube tex_prefiltered_reflection;
+	uniform mediump samplerCube tex_diffuse_irradiance_skybox;
+	uniform mediump samplerCube tex_prefiltered_reflection_skybox;
+	uniform mediump samplerCube tex_diffuse_irradiance_parallax;
+	uniform mediump samplerCube tex_prefiltered_reflection_parallax;
 	uniform mediump sampler2D   tex_brdflut;
 
 	// Material inputs
@@ -73,7 +75,7 @@
 
 	struct CubemapData
 	{
-		bool useParallaxCorrection;
+		bool useParallaxCubemap;
 		mat4 cubemapWorldToLocal;
 		vec3 cubemapPosition;
 	};

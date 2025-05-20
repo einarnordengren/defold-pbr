@@ -57,13 +57,21 @@ M.initialize = function(brdf_lut_buffer, params)
 	ctx.environment_key    = nil
 	ctx.environments       = {}
 	ctx.params             = helpers.make_params(params)
-	ctx.texture_irradiance = helpers.make_irradiance_texture(ctx.params.irradiance.width, ctx.params.irradiance.height)
-	ctx.texture_prefilter  = helpers.make_prefilter_texture(ctx.params.prefilter.width, ctx.params.prefilter.height, ctx.params.prefilter.mipmaps) 
+	ctx.texture_irradiance_skybox = helpers.make_irradiance_texture(ctx.params.irradiance.width, ctx.params.irradiance.height, "skybox")
+	ctx.texture_prefilter_skybox  = helpers.make_prefilter_texture(ctx.params.prefilter.width, ctx.params.prefilter.height, ctx.params.prefilter.mipmaps, "skybox")
 	ctx.texture_brdf_lut   = helpers.make_brdf_lut(brdf_lut_buffer, ctx.params.brdf_lut.width, ctx.params.brdf_lut.height)
-	
-	ctx.handle_irradiance  = resource.get_texture_info(ctx.texture_irradiance).handle
-	ctx.handle_prefilter   = resource.get_texture_info(ctx.texture_prefilter).handle
+
+	ctx.handle_irradiance_skybox  = resource.get_texture_info(ctx.texture_irradiance_skybox).handle
+	ctx.handle_prefilter_skybox   = resource.get_texture_info(ctx.texture_prefilter_skybox).handle
 	ctx.handle_brdf_lut    = resource.get_texture_info(ctx.texture_brdf_lut).handle
+
+	if ctx.params.use_parallax_cubemap then
+		ctx.texture_irradiance_parallax  = helpers.make_irradiance_texture(ctx.params.irradiance.width, ctx.params.irradiance.height, "parallax")
+		ctx.texture_prefilter_parallax  = helpers.make_prefilter_texture(ctx.params.prefilter.width, ctx.params.prefilter.height, ctx.params.prefilter.mipmaps, "parallax")
+		ctx.handle_irradiance_parallax  = resource.get_texture_info(ctx.texture_irradiance_parallax).handle
+		ctx.handle_prefilter_parallax   = resource.get_texture_info(ctx.texture_prefilter_parallax).handle
+	end
+
 	ctx.render_args        = {
 		camera_world           = vmath.vector3(),
 		cubemap_world_to_local = vmath.matrix4(),
@@ -209,23 +217,44 @@ end
 
 M.get_textures = function()
 	local ctx = get_ctx()
-	return {
-		irradiance = ctx.handle_irradiance,
-		prefilter  = ctx.handle_prefilter,
+
+	local textures = {
+		irradiance = ctx.handle_irradiance_skybox,
+		prefilter  = ctx.handle_prefilter_skybox,
 		brdf_lut   = ctx.handle_brdf_lut
 	}
+
+	if ctx.params.use_parallax_cubemap then
+		textures.irradiance_parallax = ctx.handle_irradiance_parallax
+		textures.handle_prefilter_parallax = ctx.handle_prefilter_parallax
+	end
+
+	return textures
 end
 
 M.enable_textures = function()
 	local ctx = get_ctx()
-	render.enable_texture("tex_diffuse_irradiance", 	ctx.handle_irradiance)
-	render.enable_texture("tex_prefiltered_reflection", ctx.handle_prefilter)
-	render.enable_texture("tex_brdflut", 				ctx.handle_brdf_lut)
+	render.enable_texture("tex_diffuse_irradiance_skybox", ctx.handle_irradiance_skybox)
+	render.enable_texture("tex_prefiltered_reflection_skybox", ctx.handle_prefilter_skybox)
+
+	if ctx.params.use_parallax_cubemap then
+		render.enable_texture("tex_diffuse_irradiance_parallax", ctx.handle_irradiance_parallax)
+		render.enable_texture("tex_prefiltered_reflection_parallax", ctx.handle_prefilter_parallax)
+	end
+
+	render.enable_texture("tex_brdflut", ctx.handle_brdf_lut)
 end
 
 M.disable_textures = function()
-	render.disable_texture("tex_diffuse_irradiance")
-	render.disable_texture("tex_prefiltered_reflection")
+	local ctx = get_ctx()
+	render.disable_texture("tex_diffuse_irradiance_skybox")
+	render.disable_texture("tex_prefiltered_reflection_skybox")
+
+	if ctx.params.use_parallax_cubemap then
+		render.disable_texture("tex_diffuse_irradiance_parallax")
+		render.disable_texture("tex_prefiltered_reflection_parallax")
+	end
+
 	render.disable_texture("tex_brdflut")
 end
 
