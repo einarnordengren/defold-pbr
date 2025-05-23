@@ -39,7 +39,8 @@ end
 
 M.load_environment = function(ctx, env_data)
 	local cubemaps = { "skybox" }
-	if ctx.params.use_parallax_cubemap then
+	local has_parallax_cubemap = env_data.cubemap_position and env_data.cubemap_position.w > 0
+	if ctx.params.use_parallax_cubemap and has_parallax_cubemap then
 		table.insert(cubemaps, "parallax")
 	end
 
